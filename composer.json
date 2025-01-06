@@ -1,0 +1,44 @@
+{
+  "name": "bomsiwor/php-trustmark",
+  "description": "Package for integrate with BPJS Trustmark",
+  "version": "0.0.1",
+  "type": "library",
+  "require-dev": {
+    "symfony/http-client": "^7.1",
+    "nyholm/psr7": "^1.8",
+    "pestphp/pest": "^1.23"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bomsiwor\\Trustmark\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "bomsiwor",
+      "email": "bomsiwor@gmail.com"
+    }
+  ],
+  "require": {
+    "psr/http-client": "^1.0",
+    "php-http/discovery": "1.17",
+    "psr/http-client-implementation": "*",
+    "psr/http-factory-implementation": "*",
+    "nullpunkt/lz-string-php": "^1.3",
+    "respect/validation": "^2.3"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": false,
+      "pestphp/pest-plugin": true
+    }
+  },
+  "scripts": {
+    "lint": "pint -v",
+    "test:lint": "pint --test -v",
+    "test:unit": "pest --colors=always"
+  }
+}
