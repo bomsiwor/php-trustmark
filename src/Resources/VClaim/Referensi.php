@@ -2,7 +2,8 @@
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
-use Bomsiwor\Trustmark\Contracts\VClaimContract;
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
+use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Core\PackageValidator;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
@@ -10,9 +11,14 @@ use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 
-final class Referensi implements VClaimContract
+final class Referensi extends BaseVClaim implements VClaimContract
 {
-    public function __construct(private readonly HttpTransporter $transporter) {}
+    private DecryptorContract $decryptor;
+
+    public function __construct(private readonly HttpTransporter $transporter)
+    {
+        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
+    }
 
     public function getServiceName(): string
     {
@@ -39,7 +45,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -62,7 +68,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -87,7 +93,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -101,12 +107,14 @@ final class Referensi implements VClaimContract
     public function dpjpLayan(JenisPelayananBPJSEnum $jenisPelayanan, string $tglPelayanan, string $kodeSpesialis)
     {
         // Validate Data
-        PackageValidator::validate([
+        PackageValidator::validate(
+            [
             'tglPelayanan' => $tglPelayanan,
         ],
             [
                 'tglPelayanan' => 'required|string|date_format:Y-m-d|before_or_equal:today',
-            ]);
+            ]
+        );
 
         // Write Format URI
         $formatUri = sprintf('%s/dokter/pelayanan/%s/tglPelayanan/%s/Spesialis/%s');
@@ -122,7 +130,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -143,7 +151,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -167,7 +175,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -191,7 +199,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -212,7 +220,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -228,13 +236,14 @@ final class Referensi implements VClaimContract
 
         // Create payload to generate request instance
         $payload = Payload::get($formatUri, [
-            $this->getServiceName(),
+      $this->getServiceName(),
+      $namaObat,
         ]);
 
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -257,7 +266,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -278,7 +287,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -301,7 +310,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -322,7 +331,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -343,7 +352,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -364,7 +373,7 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -385,6 +394,12 @@ final class Referensi implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
+
+    public function getValidationRules(array $keys): array
+    {
+        return [];
+    }
+
 }

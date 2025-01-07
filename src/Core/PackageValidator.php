@@ -48,11 +48,5 @@ final class PackageValidator
         echo $valid;
 
         return $valid;
-        // Validate
-        // if (! $validator->validate($data)) {
-        //     return false;
-        // }
-        //
-        // return true;
     }
 }

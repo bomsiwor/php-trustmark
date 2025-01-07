@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
-use Carbon\Carbon;
 use DateTime;
 use Respect\Validation\Validator as v;
 
 final class Peserta extends BaseVClaim implements VClaimContract
 {
-    public function __construct(private readonly HttpTransporter $transporter) {}
+    private DecryptorContract $decryptor;
+
+    public function __construct(private readonly HttpTransporter $transporter)
+    {
+        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
+    }
 
     public function getServiceName(): string
     {
@@ -31,7 +36,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
     public function byNIK(string $nik, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= Carbon::now()->format('Y-m-d');
+        $sepDate ??= (new DateTime())->format("Y-m-d");
 
         // Validation
         $rules = $this->getValidationRules(['nik', 'sepDate']);
@@ -46,7 +51,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -59,7 +64,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
     public function byNomorBPJS(string $noBpjs, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= Carbon::now()->format('Y-m-d');
+        $sepDate ??= (new DateTime())->format("Y-m-d");
 
         // Write format URI
         $formatUri = '%s/nokartu/%s/tglSEP/%s';
@@ -74,7 +79,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     public function getValidationRules(array $keys): array
@@ -84,8 +89,8 @@ final class Peserta extends BaseVClaim implements VClaimContract
             'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
             'sepDate' => v::date('Y-m-d')
                 ->oneOf(
-                    v::lessThan((new DateTime)->format('Y-m-d')),
-                    v::equals((new DateTime)->format('Y-m-d'))
+                    v::lessThan((new DateTime())->format('Y-m-d')),
+                    v::equals((new DateTime())->format('Y-m-d'))
                 ),
         ];
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Enums\VClaim\AssesmentPelayananEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\FlagProcedureEnum;
@@ -21,7 +22,12 @@ use Respect\Validation\Validator as v;
 
 final class SEP extends BaseVClaim implements VClaimContract
 {
-    public function __construct(private readonly HttpTransporter $transporter) {}
+    private DecryptorContract $decryptor;
+
+    public function __construct(private readonly HttpTransporter $transporter)
+    {
+        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
+    }
 
     public function getServiceName(): string
     {
@@ -49,7 +55,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -73,7 +79,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -101,7 +107,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -128,7 +134,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -156,7 +162,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -180,7 +186,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -205,7 +211,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     public function insert(array $data): mixed
@@ -215,6 +221,7 @@ final class SEP extends BaseVClaim implements VClaimContract
 
         // Construct data based on BPJS API
         $body = $this->createBody('insertSEP', $data);
+        // return $body;
 
         // Create request payload
         $uri = '%s/2.0/insert';
@@ -223,7 +230,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     public function update(array $data): mixed
@@ -241,7 +248,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -268,7 +275,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp(), false);
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp(), false);
     }
 
     /**
@@ -293,7 +300,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     public function updateTglPulang(array $data)
@@ -312,7 +319,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -336,7 +343,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp(), false);
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp(), false);
     }
 
     /**
@@ -359,7 +366,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -367,7 +374,7 @@ final class SEP extends BaseVClaim implements VClaimContract
      */
     private function getDefaultDate(?string $tglPelayanan): string
     {
-        return $tglPelayanan ?? (new DateTime)->format('Y-m-d');
+        return $tglPelayanan ?? (new DateTime())->format('Y-m-d');
     }
 
     /**
@@ -408,8 +415,8 @@ final class SEP extends BaseVClaim implements VClaimContract
             ...$sharedRules,
             'tglPelayanan' => v::date('Y-m-d')
                 ->oneOf(
-                    v::lessThan((new DateTime)->format('Y-m-d')),
-                    v::equals((new DateTime)->format('Y-m-d'))
+                    v::lessThan((new DateTime())->format('Y-m-d')),
+                    v::equals((new DateTime())->format('Y-m-d'))
                 ),
             'bulan' => v::intVal()->between(1, 12),
             'tahun' => v::intVal()->greaterThan(2000),
@@ -419,8 +426,8 @@ final class SEP extends BaseVClaim implements VClaimContract
                 ->key('tglSep', v::date('Y-m-d'))
                 ->key('ppkPelayanan', v::stringType()->length(8, 10))
                 ->key('jnsPelayanan', v::intType()->in(JenisPelayananBPJSEnum::values()))
-                ->key('asalRujukan', v::intType()->in(JenisFaskesEnum::values()))
-                ->key('tglRujukan', v::date('Y-m-d'))
+                ->key('asalRujukan', v::nullable(v::intType()->in(JenisFaskesEnum::values())))
+                ->key('tglRujukan', v::nullable(v::date('Y-m-d')))
                 ->key('noRujukan', v::nullable(v::stringType()->length(8, null)))
                 ->key('ppkRujukan', v::nullable(v::stringType()))
                 ->key('tujuanKunj', v::nullable(v::intType()->in(TujuanKunjunganEnum::values())))
@@ -503,8 +510,8 @@ final class SEP extends BaseVClaim implements VClaimContract
                         ],
                         'noMR' => $data['noMR'],
                         'rujukan' => [
-                            'asalRujukan' => $data['asalRujukan'],
-                            'tglRujukan' => $data['tglRujukan'],
+                            'asalRujukan' => $data['asalRujukan'] ?? '',
+                            'tglRujukan' => $data['tglRujukan'] ?? '',
                             'noRujukan' => $data['noRujukan'] ?? '',
                             'ppkRujukan' => $data['ppkRujukan'] ?? '',
                         ],

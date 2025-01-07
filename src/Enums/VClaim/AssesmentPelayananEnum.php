@@ -8,6 +8,7 @@ enum AssesmentPelayananEnum: int
 {
     use EnumToArray;
 
+    case DEFAULT = 0;
     case POLI_TIDAK_TERSEDIA = 1;
     case JAM_POLI_HABIS = 2;
     case DOKTER_TIDAK_TERSEDIA = 3;

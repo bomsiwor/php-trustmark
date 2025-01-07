@@ -55,7 +55,7 @@ final class Trustmark
             'userKey' => v::stringType(),
         ];
 
-        // PackageValidator::validate($validator, $options);
+        PackageValidator::validate($options, $validator);
     }
 
     private static function getServiceUri(string $service, string $env)
@@ -76,11 +76,11 @@ final class Trustmark
 
     public static function getClientClass(string $service): ?string
     {
-        // $validator = [
-        //     'service' => v::in(['vclaim']),
-        // ];
-        //
-        // PackageValidator::validate(compact($service), $validator);
+        $validator = [
+            'service' => v::in(['vclaim']),
+        ];
+
+        PackageValidator::validate(["service" => $service], $validator);
 
         return match ($service) {
             'vclaim' => VClaimClient::class,

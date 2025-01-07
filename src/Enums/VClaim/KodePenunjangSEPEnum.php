@@ -8,6 +8,7 @@ enum KodePenunjangSEPEnum: int
 {
     use EnumToArray;
 
+    case DEFAULT = 0;
     case RADIOTERAPI = 1;
     case KEMOTERAPI = 2;
     case REHABILITASI_MEDIK = 3;
