@@ -1,7 +1,7 @@
 {
   "name": "bomsiwor/php-trustmark",
   "description": "Package for integrate with BPJS Trustmark",
-  "version": "0.2.3",
+  "version": "0.1.3",
   "type": "library",
   "keywords": [
     "php",
