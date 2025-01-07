@@ -3,6 +3,15 @@
   "description": "Package for integrate with BPJS Trustmark",
   "version": "0.2.0",
   "type": "library",
+  "keywords": [
+    "php",
+    "sdk",
+    "api",
+    "client",
+    "bpjs",
+    "bpjs-kesehatan"
+  ],
+  "license": "MIT",
   "require-dev": {
     "symfony/http-client": "^7.1",
     "nyholm/psr7": "^1.8",
