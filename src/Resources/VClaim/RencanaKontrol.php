@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFilterRencanaKontrol;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFilterRencanaKontrolEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisKontrolEnum;
+use Bomsiwor\Trustmark\Exceptions\VClaimException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
-use DateTime;
 use Respect\Validation\Validator as v;
 
 final class RencanaKontrol extends BaseVClaim implements VClaimContract
 {
-    public function __construct(private readonly HttpTransporter $transporter) {}
+    private DecryptorContract $decryptor;
+
+    public function __construct(private readonly HttpTransporter $transporter)
+    {
+        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
+    }
 
     public function getServiceName(): string
     {
@@ -43,7 +49,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -66,7 +72,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -84,6 +90,9 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $bulan ??= date('m');
         $tahun ??= date('Y');
 
+        // Compute Value
+        $bulan = str_pad(strval($bulan), 2, "0", STR_PAD_LEFT);
+
         // Validate inputs
         $data = compact('bulan', 'tahun', 'noBpjs');
         $rules = $this->getValidationRules(array_keys($data));
@@ -91,21 +100,30 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
 
         // Create request payload
         $uri = sprintf(
-            '%s/ListRencanaKontrol/Bulan/%d/Tahun/%d/Nokartu/%s/filter/%d',
+            '%s/ListRencanaKontrol/Bulan/%s/Tahun/%d/Nokartu/%s/filter/%d',
             $this->getServiceName(),
             $bulan,
             $tahun,
             $noBpjs,
             $jenisFilter->value,
         );
+
         $payload = Payload::get($uri);
 
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan data rencana kontrol yang sudah diterbitkan oleh faskes.
+     *
+     * @param string $tanggalAwal Tanggal awal filter (format : Y-m-d)
+     * @param string $tanggalAkhir Tanggal akhir filter (format : Y-m-d)
+     * @param JenisFilterRencanaKontrolEnum $filter Enum jenis data yang akan dicari (entry atau rencana)
+     * @return mixed
+     */
     public function list(string $tanggalAwal, string $tanggalAkhir, JenisFilterRencanaKontrolEnum $filter)
     {
         // Validate inputs
@@ -126,7 +144,131 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Buat data rencana kontrol baru
+     *
+     * @param array $data Data rencana kontrol
+     * @return mixed
+     */
+    public function insertRencanaKontrol(array $data): mixed
+    {
+        $rules = $this->getValidationRules(['insertRencanaKontrol']);
+        $this->validate(['insertRencanaKontrol' => $data], $rules);
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('insertRencanaKontrol', $data);
+
+        // Creat erequest payload
+        $uri = "%s/insert";
+        $payload = Payload::insert($uri, [$this->getServiceName()], $body);
+
+        // Send request and get result
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Update surat kontrol yang sudah dibuat.
+     *
+     * @param array $data $data
+     * @return mixed
+     */
+    public function updateRencanaKontrol(array $data): mixed
+    {
+        $rules = $this->getValidationRules(['updateRencanaKontrol']);
+
+        $this->validate(['updateRencanaKontrol' => $data], $rules);
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('updateRencanaKontrol', $data);
+
+        // Creat erequest payload
+        $uri = "%s/Update";
+        $payload = Payload::update($uri, [$this->getServiceName()], $body);
+
+        // Send request and get result
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Membuat data SPRI baru
+     *
+     * @param array $data Data untuk SPRI
+     * @return mixed
+     */
+    public function insertSPRI(array $data): mixed
+    {
+        $rules = $this->getValidationRules(['insertSPRI']);
+        $this->validate(['insertSPRI' => $data], $rules);
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('insertSPRI', $data);
+
+        // Creat erequest payload
+        $uri = "%s/InsertSPRI";
+        $payload = Payload::insert($uri, [$this->getServiceName()], $body);
+
+        // Send request and get result
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Update SPRI yang sudah dibuat sebelunya
+     *
+     * @param array $data Data untuk SPRI
+     * @return mixed
+     */
+    public function updateSPRI(array $data): mixed
+    {
+        $rules = $this->getValidationRules(['updateSPRI']);
+        $this->validate(['updateSPRI' => $data], $rules);
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('updateSPRI', $data);
+
+        // Creat erequest payload
+        $uri = "%s/UpdateSPRI";
+        $payload = Payload::update($uri, [$this->getServiceName()], $body);
+
+        // Send request and get result
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Hapus rencana kontrol yangs sudah dibuat sebelumnya
+     *
+     * @param array $data Data untuk hapus rencana kontrol
+     * @return mixed
+     */
+    public function deleteRencanaKontrol(array $data): mixed
+    {
+        $rules = $this->getValidationRules(['deleteRencanaKontrol']);
+
+        $this->validate(['deleteRencanaKontrol' => $data], $rules);
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('deleteRencanaKontrol', $data);
+
+        // Creat erequest payload
+        $uri = "%s/Delete";
+        $payload = Payload::delete($uri, [$this->getServiceName()], $body);
+
+        // Send request and get result
+        $result = $this->transporter->sendRequest($payload);
+
+        return $result;
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -140,7 +282,11 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     public function spesialistik(JenisKontrolEnum $jenisKontrol, string $nomor, string $tglKontrol)
     {
         // Validate inputs
-        $data = compact('nomor', 'tglKontrol');
+        $data = [
+        "noSEP" => $nomor,
+        "tglRencanaKontrol" => $tglKontrol,
+        ];
+
         $rules = $this->getValidationRules(array_keys($data));
         $this->validate($data, $rules);
 
@@ -157,7 +303,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -171,7 +317,10 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     public function dokter(JenisKontrolEnum $jenisKontrol, string $kodePoli, string $tglKontrol)
     {
         // Validate inputs
-        $data = compact('kodePoli', 'tglKontrol');
+        $data = [
+              "tglRencanaKontrol" => $tglKontrol,
+        ];
+
         $rules = $this->getValidationRules(array_keys($data));
         $this->validate($data, $rules);
 
@@ -188,7 +337,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         // Send request and handle response
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -196,20 +345,104 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
      */
     public function getValidationRules(array $keys): array
     {
-        $rules = [
-            'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
-            'tglKontrol' => v::date('Y-m-d')
-                ->oneOf(
-                    v::greaterThan((new DateTime)->format('Y-m-d')),
-                    v::equals((new DateTime)->format('Y-m-d'))
-                ),
-            'noSep' => v::stringType()->length(19, 19, true),
-            'bulan' => v::intVal()->between(1, 12),
-            'tahun' => v::intVal()->greaterThan(2000),
-            'tanggalAwal' => v::date('Y-m-d'),
-            'tanggalAkhir' => v::date('Y-m-d'),
+
+        $sharedRules = [
+        "noSEP" => v::stringType()->length(19, 19, true),
+                           'tglRencanaKontrol' => v::stringType()->date('Y-m-d'),
+                           "kodeDokter" => v::nullable(v::stringType()->length(3, null)),
+                           "noSuratKontrol" => v::stringType()->length(15, null),
+      "user" => v::stringType()->length(3, null),
+      "poliKontrol" => v::stringType(),
+        ];
+
+        $rules =  [
+                           ...$sharedRules,
+        "insertRencanaKontrol" => v::key("noSEP", $sharedRules["noSEP"])
+                         ->key("kodeDokter", $sharedRules["kodeDokter"])
+                         ->key("poliKontrol", $sharedRules["poliKontrol"])
+                         ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
+                           ->key("user", $sharedRules["user"]),
+        "updateRencanaKontrol" => v::key("noSEP", $sharedRules["noSEP"])
+                          ->key("kodeDokter", $sharedRules["kodeDokter"])
+                          ->key("poliKontrol", $sharedRules["poliKontrol"])
+                          ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
+                          ->key("noSuratKontrol", $sharedRules["noSuratKontrol"])
+                           ->key("user", $sharedRules["user"]),
+        "insertSPRI" => v::key("noSEP", $sharedRules["noSEP"])
+                          ->key("kodeDokter", $sharedRules["kodeDokter"])
+                            ->key("poliKontrol", $sharedRules["poliKontrol"])
+                            ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
+                            ->key("user", $sharedRules["user"]),
+        "updateSPRI" => v::key("noSEP", $sharedRules["noSEP"])
+                          ->key("kodeDokter", $sharedRules["kodeDokter"])
+                          ->key("poliKontrol", $sharedRules["poliKontrol"])
+                          ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
+                          ->key("user", $sharedRules["user"])
+                          ->key("noSPRI", v::stringType()->length(15, null)),
+        "deleteRencanaKontrol" => v::key("noSuratKontrol", $sharedRules["noSuratKontrol"])
+                          ->key("user", $sharedRules["user"]),
         ];
 
         return array_intersect_key($rules, array_flip($keys));
     }
+
+    private function createBody(string $key, mixed $raw): mixed
+    {
+        $structures = [
+            'insertRencanaKontrol' => fn ($data) => [
+                'request' => [
+                  "noSEP" => $data['noSEP'],
+                  "kodeDokter" => $data['kodeDokter'],
+                  "poliKontrol" => $data['poliKontrol'],
+                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
+                  "user" => $data['user'],
+                ],
+            ],
+            'updateRencanaKontrol' => fn ($data) => [
+                'request' => [
+                  'noSuratKontrol' => $data['noSuratKontrol'],
+                  "noSEP" => $data['noSEP'],
+                  "kodeDokter" => $data['kodeDokter'],
+                  "poliKontrol" => $data['poliKontrol'],
+                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
+                  "user" => $data['user'],
+                ],
+            ],
+            'deleteRencanaKontrol' => fn ($data) => [
+                'request' => [
+                  "t_suratkontrol" => [
+                    "noSuratKontrol" => $data["noSuratKontrol"],
+                    "user" => $data["user"],
+          ]
+                ],
+            ],
+            'insertSPRI' => fn ($data) => [
+                'request' => [
+                  "noSEP" => $data['noSEP'],
+                  "kodeDokter" => $data['kodeDokter'],
+                  "poliKontrol" => $data['poliKontrol'],
+                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
+                  "user" => $data['user'],
+                ],
+            ],
+            'updateSPRI' => fn ($data) => [
+                'request' => [
+                  "noSEP" => $data['noSEP'],
+                  "kodeDokter" => $data['kodeDokter'],
+                  "poliKontrol" => $data['poliKontrol'],
+                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
+                  "noSPRI" => $data["noSPRI"],
+                  "user" => $data['user'],
+                ],
+            ],
+        ];
+
+        // Throw error if key not exists
+        if (! array_key_exists($key, $structures)) {
+            throw new VClaimException("Key {$key} not exists on structures", 'Validation');
+        }
+
+        return $structures[$key]($raw);
+    }
+
 }

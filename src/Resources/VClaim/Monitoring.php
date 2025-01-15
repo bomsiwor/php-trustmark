@@ -2,6 +2,7 @@
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Core\PackageValidator;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
@@ -15,7 +16,13 @@ use Respect\Validation\Validator as v;
 
 final class Monitoring extends BaseVClaim implements VClaimContract
 {
-    public function __construct(private readonly HttpTransporter $transporter) {}
+    private DecryptorContract $decryptor;
+
+    public function __construct(private readonly HttpTransporter $transporter)
+    {
+
+        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
+    }
 
     public function getServiceName(): string
     {
@@ -32,15 +39,17 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function kunjungan(JenisPelayananBPJSEnum $jenisPelayanan, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= Carbon::now()->format('Y-m-d');
+        $sepDate ??= (new DateTime())->format("Y-m-d");
 
         // Validate Data
-        PackageValidator::validate([
+        PackageValidator::validate(
+            [
             'sepDate' => $sepDate,
         ],
             [
                 'sepDate' => 'required|string|date_format:Y-m-d|before_or_equal:today',
-            ]);
+            ]
+        );
 
         // Write Format URI
         $formatUri = sprintf('%s/Kunjungan/Tanggal/%s/JnsPelayanan/$s');
@@ -51,7 +60,7 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -65,12 +74,14 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function klaim(string $tglPulang, JenisPelayananBPJSEnum $jenisPelayanan, StatusKlaimBPJSEnum $statusKlaim)
     {
         // Validate Data
-        PackageValidator::validate([
+        PackageValidator::validate(
+            [
             'tglPulang' => $tglPulang,
         ],
             [
                 'tglPulang' => 'required|string|date_format:Y-m-d|before_or_equal:today',
-            ]);
+            ]
+        );
 
         // Write Format URI
         $formatUri = sprintf('%s/Klaim/Tanggal/%s/JnsPelayanan/%s/Status/%s');
@@ -86,7 +97,7 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -100,8 +111,8 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function historyPelayananPeserta(string $noBpjs, ?string $startDate = null, ?string $endDate = null)
     {
         // Default value
-        $startDate ??= (new DateTime)->format('Y-m-d');
-        $endDate ??= (new DateTime)->format('Y-m-d');
+        $startDate ??= (new DateTime())->format('Y-m-d');
+        $endDate ??= (new DateTime())->format('Y-m-d');
 
         // Validate Data
         $data = compact('noBpjs', 'startDate', 'endDate');
@@ -122,7 +133,7 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     /**
@@ -136,14 +147,16 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function historyClaimJasaRaharja(JenisPelayananBPJSEnum $jenisPelayanan, string $startDate, string $endDate)
     {
         // Validate Data
-        PackageValidator::validate([
+        PackageValidator::validate(
+            [
             'startDate' => $startDate,
             'endDate' => $endDate,
         ],
             [
                 'startDate' => 'required|date_format:Y-md|before_or_equal:today',
                 'endDate' => 'required|date_format:Y-md|after:startDate',
-            ]);
+            ]
+        );
 
         // Write Format URI
         $formatUri = sprintf('%s/JasaRaharja/JnsPelayanan/%s/tglMulai/%s/tglAkhir/%s');
@@ -159,7 +172,7 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($result, $this->transporter->getTimestamp());
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
     public function getValidationRules(array $keys): array
