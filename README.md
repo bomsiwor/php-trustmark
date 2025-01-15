@@ -15,7 +15,7 @@
 
 ## Permulaan
 
-> **Saat ini hanya mendukung versi [PHP 8.2+](https://php.net/releases/)**
+> **Saat ini hanya mendukung versi [PHP 8.0+](https://php.net/releases/)**
 
 Pastikan [Composer](https://getcomposer.org/) sudah terinstall di dalam project.
 
