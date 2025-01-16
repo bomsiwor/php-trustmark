@@ -80,7 +80,7 @@ final class Trustmark
             'service' => v::in(['vclaim']),
         ];
 
-        PackageValidator::validate(["service" => $service], $validator);
+        PackageValidator::validate(['service' => $service], $validator);
 
         return match ($service) {
             'vclaim' => VClaimClient::class,

@@ -91,7 +91,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $tahun ??= date('Y');
 
         // Compute Value
-        $bulan = str_pad(strval($bulan), 2, "0", STR_PAD_LEFT);
+        $bulan = str_pad(strval($bulan), 2, '0', STR_PAD_LEFT);
 
         // Validate inputs
         $data = compact('bulan', 'tahun', 'noBpjs');
@@ -119,9 +119,9 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Mendapatkan data rencana kontrol yang sudah diterbitkan oleh faskes.
      *
-     * @param string $tanggalAwal Tanggal awal filter (format : Y-m-d)
-     * @param string $tanggalAkhir Tanggal akhir filter (format : Y-m-d)
-     * @param JenisFilterRencanaKontrolEnum $filter Enum jenis data yang akan dicari (entry atau rencana)
+     * @param  string  $tanggalAwal  Tanggal awal filter (format : Y-m-d)
+     * @param  string  $tanggalAkhir  Tanggal akhir filter (format : Y-m-d)
+     * @param  JenisFilterRencanaKontrolEnum  $filter  Enum jenis data yang akan dicari (entry atau rencana)
      * @return mixed
      */
     public function list(string $tanggalAwal, string $tanggalAkhir, JenisFilterRencanaKontrolEnum $filter)
@@ -150,8 +150,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Buat data rencana kontrol baru
      *
-     * @param array $data Data rencana kontrol
-     * @return mixed
+     * @param  array  $data  Data rencana kontrol
      */
     public function insertRencanaKontrol(array $data): mixed
     {
@@ -162,7 +161,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $body = $this->createBody('insertRencanaKontrol', $data);
 
         // Creat erequest payload
-        $uri = "%s/insert";
+        $uri = '%s/insert';
         $payload = Payload::insert($uri, [$this->getServiceName()], $body);
 
         // Send request and get result
@@ -174,8 +173,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Update surat kontrol yang sudah dibuat.
      *
-     * @param array $data $data
-     * @return mixed
+     * @param  array  $data  $data
      */
     public function updateRencanaKontrol(array $data): mixed
     {
@@ -187,7 +185,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $body = $this->createBody('updateRencanaKontrol', $data);
 
         // Creat erequest payload
-        $uri = "%s/Update";
+        $uri = '%s/Update';
         $payload = Payload::update($uri, [$this->getServiceName()], $body);
 
         // Send request and get result
@@ -199,8 +197,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Membuat data SPRI baru
      *
-     * @param array $data Data untuk SPRI
-     * @return mixed
+     * @param  array  $data  Data untuk SPRI
      */
     public function insertSPRI(array $data): mixed
     {
@@ -211,7 +208,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $body = $this->createBody('insertSPRI', $data);
 
         // Creat erequest payload
-        $uri = "%s/InsertSPRI";
+        $uri = '%s/InsertSPRI';
         $payload = Payload::insert($uri, [$this->getServiceName()], $body);
 
         // Send request and get result
@@ -223,8 +220,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Update SPRI yang sudah dibuat sebelunya
      *
-     * @param array $data Data untuk SPRI
-     * @return mixed
+     * @param  array  $data  Data untuk SPRI
      */
     public function updateSPRI(array $data): mixed
     {
@@ -235,7 +231,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $body = $this->createBody('updateSPRI', $data);
 
         // Creat erequest payload
-        $uri = "%s/UpdateSPRI";
+        $uri = '%s/UpdateSPRI';
         $payload = Payload::update($uri, [$this->getServiceName()], $body);
 
         // Send request and get result
@@ -247,8 +243,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     /**
      * Hapus rencana kontrol yangs sudah dibuat sebelumnya
      *
-     * @param array $data Data untuk hapus rencana kontrol
-     * @return mixed
+     * @param  array  $data  Data untuk hapus rencana kontrol
      */
     public function deleteRencanaKontrol(array $data): mixed
     {
@@ -260,7 +255,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $body = $this->createBody('deleteRencanaKontrol', $data);
 
         // Creat erequest payload
-        $uri = "%s/Delete";
+        $uri = '%s/Delete';
         $payload = Payload::delete($uri, [$this->getServiceName()], $body);
 
         // Send request and get result
@@ -283,8 +278,8 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     {
         // Validate inputs
         $data = [
-        "noSEP" => $nomor,
-        "tglRencanaKontrol" => $tglKontrol,
+            'noSEP' => $nomor,
+            'tglRencanaKontrol' => $tglKontrol,
         ];
 
         $rules = $this->getValidationRules(array_keys($data));
@@ -318,7 +313,7 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     {
         // Validate inputs
         $data = [
-              "tglRencanaKontrol" => $tglKontrol,
+            'tglRencanaKontrol' => $tglKontrol,
         ];
 
         $rules = $this->getValidationRules(array_keys($data));
@@ -347,40 +342,40 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
     {
 
         $sharedRules = [
-        "noSEP" => v::stringType()->length(19, 19, true),
-                           'tglRencanaKontrol' => v::stringType()->date('Y-m-d'),
-                           "kodeDokter" => v::nullable(v::stringType()->length(3, null)),
-                           "noSuratKontrol" => v::stringType()->length(15, null),
-      "user" => v::stringType()->length(3, null),
-      "poliKontrol" => v::stringType(),
+            'noSEP' => v::stringType()->length(19, 19, true),
+            'tglRencanaKontrol' => v::stringType()->date('Y-m-d'),
+            'kodeDokter' => v::nullable(v::stringType()->length(3, null)),
+            'noSuratKontrol' => v::stringType()->length(15, null),
+            'user' => v::stringType()->length(3, null),
+            'poliKontrol' => v::stringType(),
         ];
 
-        $rules =  [
-                           ...$sharedRules,
-        "insertRencanaKontrol" => v::key("noSEP", $sharedRules["noSEP"])
-                         ->key("kodeDokter", $sharedRules["kodeDokter"])
-                         ->key("poliKontrol", $sharedRules["poliKontrol"])
-                         ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
-                           ->key("user", $sharedRules["user"]),
-        "updateRencanaKontrol" => v::key("noSEP", $sharedRules["noSEP"])
-                          ->key("kodeDokter", $sharedRules["kodeDokter"])
-                          ->key("poliKontrol", $sharedRules["poliKontrol"])
-                          ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
-                          ->key("noSuratKontrol", $sharedRules["noSuratKontrol"])
-                           ->key("user", $sharedRules["user"]),
-        "insertSPRI" => v::key("noSEP", $sharedRules["noSEP"])
-                          ->key("kodeDokter", $sharedRules["kodeDokter"])
-                            ->key("poliKontrol", $sharedRules["poliKontrol"])
-                            ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
-                            ->key("user", $sharedRules["user"]),
-        "updateSPRI" => v::key("noSEP", $sharedRules["noSEP"])
-                          ->key("kodeDokter", $sharedRules["kodeDokter"])
-                          ->key("poliKontrol", $sharedRules["poliKontrol"])
-                          ->key("tglRencanaKontrol", $sharedRules['tglRencanaKontrol'])
-                          ->key("user", $sharedRules["user"])
-                          ->key("noSPRI", v::stringType()->length(15, null)),
-        "deleteRencanaKontrol" => v::key("noSuratKontrol", $sharedRules["noSuratKontrol"])
-                          ->key("user", $sharedRules["user"]),
+        $rules = [
+            ...$sharedRules,
+            'insertRencanaKontrol' => v::key('noSEP', $sharedRules['noSEP'])
+                ->key('kodeDokter', $sharedRules['kodeDokter'])
+                ->key('poliKontrol', $sharedRules['poliKontrol'])
+                ->key('tglRencanaKontrol', $sharedRules['tglRencanaKontrol'])
+                ->key('user', $sharedRules['user']),
+            'updateRencanaKontrol' => v::key('noSEP', $sharedRules['noSEP'])
+                ->key('kodeDokter', $sharedRules['kodeDokter'])
+                ->key('poliKontrol', $sharedRules['poliKontrol'])
+                ->key('tglRencanaKontrol', $sharedRules['tglRencanaKontrol'])
+                ->key('noSuratKontrol', $sharedRules['noSuratKontrol'])
+                ->key('user', $sharedRules['user']),
+            'insertSPRI' => v::key('noSEP', $sharedRules['noSEP'])
+                ->key('kodeDokter', $sharedRules['kodeDokter'])
+                ->key('poliKontrol', $sharedRules['poliKontrol'])
+                ->key('tglRencanaKontrol', $sharedRules['tglRencanaKontrol'])
+                ->key('user', $sharedRules['user']),
+            'updateSPRI' => v::key('noSEP', $sharedRules['noSEP'])
+                ->key('kodeDokter', $sharedRules['kodeDokter'])
+                ->key('poliKontrol', $sharedRules['poliKontrol'])
+                ->key('tglRencanaKontrol', $sharedRules['tglRencanaKontrol'])
+                ->key('user', $sharedRules['user'])
+                ->key('noSPRI', v::stringType()->length(15, null)),
+            'deleteRencanaKontrol' => v::key('noSuratKontrol', $sharedRules['noSuratKontrol'])
+                ->key('user', $sharedRules['user']),
         ];
 
         return array_intersect_key($rules, array_flip($keys));
@@ -391,48 +386,48 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
         $structures = [
             'insertRencanaKontrol' => fn ($data) => [
                 'request' => [
-                  "noSEP" => $data['noSEP'],
-                  "kodeDokter" => $data['kodeDokter'],
-                  "poliKontrol" => $data['poliKontrol'],
-                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
-                  "user" => $data['user'],
+                    'noSEP' => $data['noSEP'],
+                    'kodeDokter' => $data['kodeDokter'],
+                    'poliKontrol' => $data['poliKontrol'],
+                    'tglRencanaKontrol' => $data['tglRencanaKontrol'],
+                    'user' => $data['user'],
                 ],
             ],
             'updateRencanaKontrol' => fn ($data) => [
                 'request' => [
-                  'noSuratKontrol' => $data['noSuratKontrol'],
-                  "noSEP" => $data['noSEP'],
-                  "kodeDokter" => $data['kodeDokter'],
-                  "poliKontrol" => $data['poliKontrol'],
-                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
-                  "user" => $data['user'],
+                    'noSuratKontrol' => $data['noSuratKontrol'],
+                    'noSEP' => $data['noSEP'],
+                    'kodeDokter' => $data['kodeDokter'],
+                    'poliKontrol' => $data['poliKontrol'],
+                    'tglRencanaKontrol' => $data['tglRencanaKontrol'],
+                    'user' => $data['user'],
                 ],
             ],
             'deleteRencanaKontrol' => fn ($data) => [
                 'request' => [
-                  "t_suratkontrol" => [
-                    "noSuratKontrol" => $data["noSuratKontrol"],
-                    "user" => $data["user"],
-          ]
+                    't_suratkontrol' => [
+                        'noSuratKontrol' => $data['noSuratKontrol'],
+                        'user' => $data['user'],
+                    ],
                 ],
             ],
             'insertSPRI' => fn ($data) => [
                 'request' => [
-                  "noSEP" => $data['noSEP'],
-                  "kodeDokter" => $data['kodeDokter'],
-                  "poliKontrol" => $data['poliKontrol'],
-                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
-                  "user" => $data['user'],
+                    'noSEP' => $data['noSEP'],
+                    'kodeDokter' => $data['kodeDokter'],
+                    'poliKontrol' => $data['poliKontrol'],
+                    'tglRencanaKontrol' => $data['tglRencanaKontrol'],
+                    'user' => $data['user'],
                 ],
             ],
             'updateSPRI' => fn ($data) => [
                 'request' => [
-                  "noSEP" => $data['noSEP'],
-                  "kodeDokter" => $data['kodeDokter'],
-                  "poliKontrol" => $data['poliKontrol'],
-                  "tglRencanaKontrol" => $data['tglRencanaKontrol'],
-                  "noSPRI" => $data["noSPRI"],
-                  "user" => $data['user'],
+                    'noSEP' => $data['noSEP'],
+                    'kodeDokter' => $data['kodeDokter'],
+                    'poliKontrol' => $data['poliKontrol'],
+                    'tglRencanaKontrol' => $data['tglRencanaKontrol'],
+                    'noSPRI' => $data['noSPRI'],
+                    'user' => $data['user'],
                 ],
             ],
         ];
@@ -444,5 +439,4 @@ final class RencanaKontrol extends BaseVClaim implements VClaimContract
 
         return $structures[$key]($raw);
     }
-
 }

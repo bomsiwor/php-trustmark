@@ -11,6 +11,7 @@ use Bomsiwor\Trustmark\Enums\VClaim\FlagProcedureEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisKecelakaanBPJSEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
+use Bomsiwor\Trustmark\Enums\VClaim\JenisPengajuanSEPApprovalEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\KodePenunjangSEPEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\TujuanKunjunganEnum;
 use Bomsiwor\Trustmark\Exceptions\VClaimException;
@@ -214,6 +215,58 @@ final class SEP extends BaseVClaim implements VClaimContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Pengajuan SEP manual backdate atau pengajuan fingerprint
+     *
+     * @param  array  $data  Data untuk pengajuan SEP manual
+     * @return mixed
+     */
+    public function proposalSEPManual(array $data)
+    {
+        // Validate inputs
+        $rules = $this->getValidationRules(['pengajuanSEP']);
+        $this->validate(['pengajuanSEP' => $data], $rules);
+
+        // Create request payload
+        $uri = sprintf('%s/pengajuanSEP', $this->getServiceName());
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('pengajuanSEP', $data);
+
+        $payload = Payload::insert($uri, content: $body);
+
+        // Send request and handle response
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    /**
+     * Approval admin untuk pengajuan SEP Manual
+     *
+     * @param  array  $data  Data untuk approve SEP Manual
+     * @return mixed
+     */
+    public function approvalSEPManual(array $data)
+    {
+        // Validate inputs
+        $rules = $this->getValidationRules(['pengajuanSEP']);
+        $this->validate(['pengajuanSEP' => $data], $rules);
+
+        // Create request payload
+        $uri = sprintf('%s/aprovalSEP', $this->getServiceName());
+
+        // Construct data based on BPJS API
+        $body = $this->createBody('pengajuanSEP', $data);
+
+        $payload = Payload::insert($uri, content: $body);
+
+        // Send request and handle response
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
     public function insert(array $data): mixed
     {
         $rules = $this->getValidationRules(['insertSEP']);
@@ -369,12 +422,32 @@ final class SEP extends BaseVClaim implements VClaimContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    public function deleteSEPInternal(array $data): mixed
+    {
+        // RUles
+        $rules = $this->getValidationRules(['deleteSEPInternal']);
+        // Validate
+        $this->validate(['deleteSEPInternal' => $data], $rules);
+
+        // Construct request body based on BPSJ API
+        $body = $this->createBody('deleteSEPInternal', $data);
+
+        // Create request payload
+        $uri = '%s/Internal/delete';
+        $payload = Payload::delete($uri, [$this->getServiceName()], $body);
+
+        // Send request
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp(), false);
+    }
+
     /**
      * Get the default date if none is provided.
      */
     private function getDefaultDate(?string $tglPelayanan): string
     {
-        return $tglPelayanan ?? (new DateTime())->format('Y-m-d');
+        return $tglPelayanan ?? (new DateTime)->format('Y-m-d');
     }
 
     /**
@@ -409,14 +482,17 @@ final class SEP extends BaseVClaim implements VClaimContract
             'noTelp' => v::nullable(v::stringType()->length(8)),
             'user' => v::stringType()->length(3, null),
             'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
+            'tglSep' => v::date('Y-m-d'),
+            'jnsPelayanan' => v::intType()->in(JenisPelayananBPJSEnum::values()),
+            'jnsPengajuan' => v::intType()->in(JenisPengajuanSEPApprovalEnum::values()),
         ];
 
         $rules = [
             ...$sharedRules,
             'tglPelayanan' => v::date('Y-m-d')
                 ->oneOf(
-                    v::lessThan((new DateTime())->format('Y-m-d')),
-                    v::equals((new DateTime())->format('Y-m-d'))
+                    v::lessThan((new DateTime)->format('Y-m-d')),
+                    v::equals((new DateTime)->format('Y-m-d'))
                 ),
             'bulan' => v::intVal()->between(1, 12),
             'tahun' => v::intVal()->greaterThan(2000),
@@ -425,7 +501,7 @@ final class SEP extends BaseVClaim implements VClaimContract
             'insertSEP' => v::key('noBpjs', $sharedRules['noBpjs'])
                 ->key('tglSep', v::date('Y-m-d'))
                 ->key('ppkPelayanan', v::stringType()->length(8, 10))
-                ->key('jnsPelayanan', v::intType()->in(JenisPelayananBPJSEnum::values()))
+                ->key('jnsPelayanan', $sharedRules['jnsPelayanan'])
                 ->key('asalRujukan', v::nullable(v::intType()->in(JenisFaskesEnum::values())))
                 ->key('tglRujukan', v::nullable(v::date('Y-m-d')))
                 ->key('noRujukan', v::nullable(v::stringType()->length(8, null)))
@@ -487,6 +563,17 @@ final class SEP extends BaseVClaim implements VClaimContract
             'updateTglPulang' => v::key('noSep', $sharedRules['noSep'])
                 ->key('user', $sharedRules['user'])
                 ->key('tglPulang', v::date('Y-m-d')),
+            'pengajuanSEP' => v::key('noKartu', $sharedRules['noBpjs'])
+                ->key('tglSep', $sharedRules['tglSep'])
+                ->key('jnsPelayanan', $sharedRules['jnsPelayanan'])
+                ->key('jnsPengajuan', $sharedRules['jnsPengajuan'])
+                ->key('keterangan', v::stringType())
+                ->key('user', $sharedRules['user']),
+            'deleteSEPInternal' => v::key('noSep', $sharedRules['noSep'])
+                ->key('noSurat', v::stringType())
+                ->key('kodePoli', $sharedRules['poliTujuan'])
+                ->key('tglRujukanInternal', v::date('Y-m-d'))
+                ->key('user', $sharedRules['user']),
         ];
 
         return array_intersect_key($rules, array_flip($keys));
@@ -620,6 +707,29 @@ final class SEP extends BaseVClaim implements VClaimContract
                         'tglMeninggal' => $data['tglMeninggal'],
                         'tglPulang' => $data['tglPulang'],
                         'noLPManual' => $data['noLPManual'],
+                        'user' => $data['user'],
+                    ],
+                ],
+            ],
+            'pengajuanSEP' => fn ($data) => [
+                'request' => [
+                    't_sep' => [
+                        'noKartu' => $data['noKartu'],
+                        'tglSep' => $data['tglSep'],
+                        'jnsPelayanan' => $data['jnsPelayanan'],
+                        'jnsPengajuan' => $data['jnsPengajuan'],
+                        'keterangan' => $data['keterangan'],
+                        'user' => $data['user'],
+                    ],
+                ],
+            ],
+            'deleteSEPInternal' => fn ($data) => [
+                'request' => [
+                    't_sep' => [
+                        'noSep' => $data['noSep'],
+                        'noSurat' => $data['noSurat'],
+                        'tglRujukanInternal' => $data['tglRujukanInternal'],
+                        'kdPoliTuj' => $data['kodePoli'],
                         'user' => $data['user'],
                     ],
                 ],

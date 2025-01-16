@@ -14,9 +14,7 @@ use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 
 final class VClaimClient implements ClientContract
 {
-    public function __construct(public readonly HttpTransporter $transporter)
-    {
-    }
+    public function __construct(public readonly HttpTransporter $transporter) {}
 
     public function peserta(): Peserta
     {

@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Core\Signature;
 
-use Carbon\Carbon;
-
 final class VClaimSignature
 {
-    private function __construct(private string $timestamp, private string $signature)
-    {
-    }
+    private function __construct(private string $timestamp, private string $signature) {}
 
     /**
      * Genearate signature for Header VClaim

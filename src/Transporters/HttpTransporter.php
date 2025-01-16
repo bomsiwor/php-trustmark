@@ -15,8 +15,7 @@ final class HttpTransporter
         private array $headers,
         private string $timestamp,
         private array $config = [],
-    ) {
-    }
+    ) {}
 
     public function getTimestamp(): string
     {

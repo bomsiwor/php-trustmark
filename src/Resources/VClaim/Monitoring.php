@@ -10,7 +10,6 @@ use Bomsiwor\Trustmark\Enums\VClaim\StatusKlaimBPJSEnum;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
-use Carbon\Carbon;
 use DateTime;
 use Respect\Validation\Validator as v;
 
@@ -39,13 +38,13 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function kunjungan(JenisPelayananBPJSEnum $jenisPelayanan, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= (new DateTime())->format("Y-m-d");
+        $sepDate ??= (new DateTime)->format('Y-m-d');
 
         // Validate Data
         PackageValidator::validate(
             [
-            'sepDate' => $sepDate,
-        ],
+                'sepDate' => $sepDate,
+            ],
             [
                 'sepDate' => 'required|string|date_format:Y-m-d|before_or_equal:today',
             ]
@@ -76,8 +75,8 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Validate Data
         PackageValidator::validate(
             [
-            'tglPulang' => $tglPulang,
-        ],
+                'tglPulang' => $tglPulang,
+            ],
             [
                 'tglPulang' => 'required|string|date_format:Y-m-d|before_or_equal:today',
             ]
@@ -111,8 +110,8 @@ final class Monitoring extends BaseVClaim implements VClaimContract
     public function historyPelayananPeserta(string $noBpjs, ?string $startDate = null, ?string $endDate = null)
     {
         // Default value
-        $startDate ??= (new DateTime())->format('Y-m-d');
-        $endDate ??= (new DateTime())->format('Y-m-d');
+        $startDate ??= (new DateTime)->format('Y-m-d');
+        $endDate ??= (new DateTime)->format('Y-m-d');
 
         // Validate Data
         $data = compact('noBpjs', 'startDate', 'endDate');
@@ -149,9 +148,9 @@ final class Monitoring extends BaseVClaim implements VClaimContract
         // Validate Data
         PackageValidator::validate(
             [
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-        ],
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+            ],
             [
                 'startDate' => 'required|date_format:Y-md|before_or_equal:today',
                 'endDate' => 'required|date_format:Y-md|after:startDate',

@@ -19,9 +19,7 @@ final class Factory
 
     private array $headers = [];
 
-    public function __construct(private string $clientClass)
-    {
-    }
+    public function __construct(private string $clientClass) {}
 
     public function withBaseUrl(string $baseUrl): self
     {

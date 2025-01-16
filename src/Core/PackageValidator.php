@@ -9,15 +9,13 @@ use Respect\Validation\Validator as v;
 
 final class PackageValidator
 {
-    public function __construct(protected array $data, protected array $validator)
-    {
-    }
+    public function __construct(protected array $data, protected array $validator) {}
 
     public static function validate(array $data, array $rules): bool
     {
         try {
 
-            $validator = new v();
+            $validator = new v;
 
             // Loop through data and validation rules
             foreach ($rules as $key => $rule) {
@@ -37,7 +35,7 @@ final class PackageValidator
     public function check(): bool
     {
 
-        $validator = new v();
+        $validator = new v;
 
         // Loop through data and validation rules
         foreach ($this->validator as $key => $value) {

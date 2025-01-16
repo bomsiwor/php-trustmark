@@ -109,8 +109,8 @@ final class Referensi extends BaseVClaim implements VClaimContract
         // Validate Data
         PackageValidator::validate(
             [
-            'tglPelayanan' => $tglPelayanan,
-        ],
+                'tglPelayanan' => $tglPelayanan,
+            ],
             [
                 'tglPelayanan' => 'required|string|date_format:Y-m-d|before_or_equal:today',
             ]
@@ -236,8 +236,8 @@ final class Referensi extends BaseVClaim implements VClaimContract
 
         // Create payload to generate request instance
         $payload = Payload::get($formatUri, [
-      $this->getServiceName(),
-      $namaObat,
+            $this->getServiceName(),
+            $namaObat,
         ]);
 
         // Send request using transporter
@@ -401,5 +401,4 @@ final class Referensi extends BaseVClaim implements VClaimContract
     {
         return [];
     }
-
 }

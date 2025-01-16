@@ -8,8 +8,8 @@ use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
-use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
+use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
 use Respect\Validation\Validator as v;
 
@@ -299,8 +299,8 @@ final class Rujukan extends BaseVClaim implements VClaimContract
             'kodePPK' => v::stringType()->length(8, 8)->setName('Kode PPK'),
             'tglPelayanan' => v::date('Y-m-d')
                 ->oneOf(
-                    v::lessThan((new DateTime())->format('Y-m-d')),
-                    v::equals((new DateTime())->format('Y-m-d'))
+                    v::lessThan((new DateTime)->format('Y-m-d')),
+                    v::equals((new DateTime)->format('Y-m-d'))
                 ),
             'tanggalAwal' => v::date('Y-m-d'),
             'tanggalAkhir' => v::date('Y-m-d'),

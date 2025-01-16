@@ -36,7 +36,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
     public function byNIK(string $nik, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= (new DateTime())->format("Y-m-d");
+        $sepDate ??= (new DateTime)->format('Y-m-d');
 
         // Validation
         $rules = $this->getValidationRules(['nik', 'sepDate']);
@@ -64,7 +64,7 @@ final class Peserta extends BaseVClaim implements VClaimContract
     public function byNomorBPJS(string $noBpjs, ?string $sepDate = null)
     {
         // Default sepDate
-        $sepDate ??= (new DateTime())->format("Y-m-d");
+        $sepDate ??= (new DateTime)->format('Y-m-d');
 
         // Write format URI
         $formatUri = '%s/nokartu/%s/tglSEP/%s';
@@ -89,8 +89,8 @@ final class Peserta extends BaseVClaim implements VClaimContract
             'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
             'sepDate' => v::date('Y-m-d')
                 ->oneOf(
-                    v::lessThan((new DateTime())->format('Y-m-d')),
-                    v::equals((new DateTime())->format('Y-m-d'))
+                    v::lessThan((new DateTime)->format('Y-m-d')),
+                    v::equals((new DateTime)->format('Y-m-d'))
                 ),
         ];
 
