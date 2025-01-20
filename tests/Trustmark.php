@@ -21,10 +21,8 @@ it('create a client based on service id', function (string $serviceId, string $s
     ]);
 
 it('throw error on invalid service id', function () use ($consId, $userKey, $secretKey) {
-
-    expect(fn () => Trustmark::client($consId, $secretKey, $userKey, 'random', 'production'))
-        ->toThrow(TrustmarkException::class);
-});
+    Trustmark::client($consId, $secretKey, $userKey, 'random', 'production');
+})->throws(TrustmarkException::class);
 
 it('create a client via factory', function () {
     $trustmarkClient = Trustmark::factory(VClaimClient::class)
