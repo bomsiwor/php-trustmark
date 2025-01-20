@@ -1,6 +1,6 @@
 <?php
 
-namespace Bomsiwor\Trustmark\Enums;
+namespace Bomsiwor\Trustmark\Traits;
 
 trait EnumToArray
 {

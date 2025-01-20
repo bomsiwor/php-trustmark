@@ -2,7 +2,7 @@
 
 namespace Bomsiwor\Trustmark\Enums\VClaim;
 
-use Bomsiwor\Trustmark\Enums\EnumToArray;
+use Bomsiwor\Trustmark\Traits\EnumToArray;
 
 enum AssesmentPelayananEnum: int
 {

@@ -4,10 +4,9 @@ namespace Bomsiwor\Trustmark\Enums\VClaim;
 
 use Bomsiwor\Trustmark\Traits\EnumToArray;
 
-enum JenisPengajuanSEPApprovalEnum: int
+enum PenjaminLPKEnum: int
 {
     use EnumToArray;
 
-    case BACKDATE = 1;
-    case FINGER = 2;
+    case JKN = 1;
 }
