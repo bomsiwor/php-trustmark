@@ -2,7 +2,7 @@
 
 namespace Bomsiwor\Trustmark\Core;
 
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Exception;
 use Respect\Validation\Exceptions\NestedValidationException;
 use Respect\Validation\Validator as v;
@@ -28,7 +28,7 @@ final class PackageValidator
             return true;
 
         } catch (NestedValidationException $e) {
-            throw new VClaimException($e->getMessage(), 'Local/Validation', $e->getMessages());
+            throw new TrustmarkException($e->getMessage(), 'Local/Validation', $e->getMessages());
         }
     }
 

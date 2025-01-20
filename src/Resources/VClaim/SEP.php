@@ -14,7 +14,7 @@ use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisPengajuanSEPApprovalEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\KodePenunjangSEPEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\TujuanKunjunganEnum;
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
@@ -738,7 +738,7 @@ final class SEP extends BaseVClaim implements VClaimContract
 
         // Throw error if key not exists
         if (! array_key_exists($key, $structures)) {
-            throw new VClaimException("Key {$key} not exists on structures", 'Validation');
+            throw new TrustmarkException("Key {$key} not exists on structures", 'Validation');
         }
 
         return $structures[$key]($raw);

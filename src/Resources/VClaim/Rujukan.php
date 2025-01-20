@@ -9,7 +9,7 @@ use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\TipeRujukanEnum;
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
@@ -511,7 +511,7 @@ final class Rujukan extends BaseVClaim implements VClaimContract
 
         // Throw error if key not exists
         if (! array_key_exists($key, $structures)) {
-            throw new VClaimException("Key {$key} not exists on structures", 'Validation');
+            throw new TrustmarkException("Key {$key} not exists on structures", 'Validation');
         }
 
         return $structures[$key]($raw);

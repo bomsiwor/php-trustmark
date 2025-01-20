@@ -5,7 +5,7 @@ namespace Bomsiwor\Trustmark\Resources\VClaim;
 use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
 use Bomsiwor\Trustmark\Core\PackageValidator;
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
@@ -251,7 +251,7 @@ final class PRB extends BaseVClaim implements VClaimContract
 
         // Throw error if key not exists
         if (! array_key_exists($key, $structures)) {
-            throw new VClaimException("Key {$key} not exists on structures", 'Validation');
+            throw new TrustmarkException("Key {$key} not exists on structures", 'Validation');
         }
 
         return $structures[$key]($raw);
