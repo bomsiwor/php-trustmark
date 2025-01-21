@@ -11,6 +11,7 @@ beforeEach(function () {
     $userKey = 'userkey';
 
     $this->client = Trustmark::client($consId, $secretKey, $userKey, 'vclaim');
+    var_dump($this->client);
 });
 
 it('has referensi subservice', function () {

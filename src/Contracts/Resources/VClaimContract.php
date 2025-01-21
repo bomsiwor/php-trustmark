@@ -10,4 +10,6 @@ interface VClaimContract
     public function getServiceName(): string;
 
     public function getValidationRules(array $keys): array;
+
+    public function createBody(string $key, mixed $data): mixed;
 }

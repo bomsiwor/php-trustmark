@@ -13,12 +13,7 @@ use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 
 final class Referensi extends BaseVClaim implements VClaimContract
 {
-    private DecryptorContract $decryptor;
-
-    public function __construct(private readonly HttpTransporter $transporter)
-    {
-        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
-    }
+    public function __construct(private readonly HttpTransporter $transporter, private readonly DecryptorContract $decryptor) {}
 
     public function getServiceName(): string
     {

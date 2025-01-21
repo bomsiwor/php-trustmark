@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Resources\VClaim;
 
-use Bomsiwor\Trustmark\Core\Decryptor\VClaimDecryptor;
 use Bomsiwor\Trustmark\Core\PackageValidator;
 
 class BaseVClaim
@@ -19,8 +18,8 @@ class BaseVClaim
         PackageValidator::validate($data, $rules);
     }
 
-    protected function createDecryptor(string $consId, string $secretKey)
+    public function createBody(string $key, mixed $data): mixed
     {
-        return new VClaimDecryptor($consId, $secretKey);
+        return [];
     }
 }

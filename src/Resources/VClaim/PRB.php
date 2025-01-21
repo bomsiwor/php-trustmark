@@ -13,12 +13,7 @@ use Respect\Validation\Validator as v;
 
 final class PRB extends BaseVClaim implements VClaimContract
 {
-    private DecryptorContract $decryptor;
-
-    public function __construct(private readonly HttpTransporter $transporter)
-    {
-        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
-    }
+    public function __construct(private readonly HttpTransporter $transporter, private readonly DecryptorContract $decryptor) {}
 
     public function getServiceName(): string
     {
@@ -204,7 +199,7 @@ final class PRB extends BaseVClaim implements VClaimContract
         return array_intersect_key($rules, array_flip($keys));
     }
 
-    private function createBody(string $key, mixed $raw): mixed
+    public function createBody(string $key, mixed $raw): mixed
     {
         $structures = [
             'insert' => fn ($data) => [

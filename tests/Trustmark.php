@@ -24,10 +24,19 @@ it('throw error on invalid service id', function () use ($consId, $userKey, $sec
     Trustmark::client($consId, $secretKey, $userKey, 'random', 'production');
 })->throws(TrustmarkException::class);
 
-it('create a client via factory', function () {
+it('throw error on trustmark client without config', function () {
+    Trustmark::factory(VClaimClient::class)
+        ->withBaseUrl('http://trustmark.test')
+        ->withTimestamp(time())
+        ->make();
+
+})->throws(TypeError::class);
+
+it('create a trustmark client via factory', function () {
     $trustmarkClient = Trustmark::factory(VClaimClient::class)
         ->withBaseUrl('http://trustmark.test')
         ->withTimestamp(time())
+        ->withConfig(['consId' => 123, 'secretKey' => 123])
         ->make();
 
     expect($trustmarkClient)->toBeInstanceOf(ClientContract::class)->toBeInstanceOf(VClaimClient::class);

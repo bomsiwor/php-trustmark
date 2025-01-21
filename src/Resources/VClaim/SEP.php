@@ -6,6 +6,7 @@ namespace Bomsiwor\Trustmark\Resources\VClaim;
 
 use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
+use Bomsiwor\Trustmark\Contracts\TransporterContract;
 use Bomsiwor\Trustmark\Enums\VClaim\AssesmentPelayananEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\FlagProcedureEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
@@ -16,19 +17,13 @@ use Bomsiwor\Trustmark\Enums\VClaim\KodePenunjangSEPEnum;
 use Bomsiwor\Trustmark\Enums\VClaim\TujuanKunjunganEnum;
 use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
-use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
 use Respect\Validation\Validator as v;
 
 final class SEP extends BaseVClaim implements VClaimContract
 {
-    private DecryptorContract $decryptor;
-
-    public function __construct(private readonly HttpTransporter $transporter)
-    {
-        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
-    }
+    public function __construct(private readonly TransporterContract $transporter, private readonly DecryptorContract $decryptor) {}
 
     public function getServiceName(): string
     {
@@ -579,7 +574,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         return array_intersect_key($rules, array_flip($keys));
     }
 
-    private function createBody(string $key, mixed $raw): mixed
+    public function createBody(string $key, mixed $raw): mixed
     {
         $structures = [
             'insertSEP' => fn ($data) => [
