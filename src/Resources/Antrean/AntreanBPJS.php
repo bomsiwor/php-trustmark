@@ -12,7 +12,7 @@ use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
 use Respect\Validation\Validator as v;
 
-final class Peserta extends BaseWSAntrean implements AntreanContract
+final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
 {
     public function __construct(private readonly TransporterContract $transporter, private readonly DecryptorContract $decryptor) {}
 
@@ -110,13 +110,15 @@ final class Peserta extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
-    public function taskIDList()
+    public function taskIDList(string $kodeBooking)
     {
         // Write Format URI
         $formatUri = '%s/getlisttask';
 
         // Create payload to generate request instance
-        $payload = Payload::get($formatUri, [$this->getServiceName()]);
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], [
+            'kodebooking' => $kodeBooking,
+        ]);
 
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
@@ -135,7 +137,9 @@ final class Peserta extends BaseWSAntrean implements AntreanContract
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
 
-        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+        return $result;
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp(), false);
     }
 
     public function dashboardPerBulan(int $bulan, int $tahun, string $waktu)
@@ -197,7 +201,7 @@ final class Peserta extends BaseWSAntrean implements AntreanContract
     public function belumDilayaniPerPoli(string $kodePoli, string $kodeDokter, string $hari, string $jamPraktik)
     {
         // Write Format URI
-        $formatUri = '%s/pendaftaran/kodepoli/%s/kodedokter/%s/hari/%s/waktu/%s';
+        $formatUri = '%s/pendaftaran/kodepoli/%s/kodedokter/%s/hari/%s/jampraktek/%s';
 
         // Create payload to generate request instance
         $payload = Payload::get($formatUri, [$this->getServiceName(), $kodePoli, $kodeDokter, $hari, $jamPraktik]);

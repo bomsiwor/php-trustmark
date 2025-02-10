@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bomsiwor\Trustmark\Core;
 
 use Bomsiwor\Trustmark\Contracts\ClientContract;
+use Bomsiwor\Trustmark\Core\Clients\AntreanClient;
 use Bomsiwor\Trustmark\Core\Clients\VClaimClient;
 use Bomsiwor\Trustmark\Core\Signature\VClaimSignature;
 use Respect\Validation\Validator as v;
@@ -63,6 +64,8 @@ final class Trustmark
         return match ($service.'.'.$env) {
             'vclaim.production' => 'vclaim-rest',
             'vclaim.development' => 'vclaim-rest-dev',
+            'antrean.production' => 'antreanrs',
+            'antrean.development' => 'antreanrs_dev',
         };
     }
 
@@ -77,13 +80,14 @@ final class Trustmark
     public static function getClientClass(string $service): ?string
     {
         $validator = [
-            'service' => v::in(['vclaim']),
+            'service' => v::in(['vclaim', 'antrean']),
         ];
 
         PackageValidator::validate(['service' => $service], $validator);
 
         return match ($service) {
             'vclaim' => VClaimClient::class,
+            'antrean' => AntreanClient::class,
             default => null,
         };
     }

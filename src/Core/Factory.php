@@ -3,6 +3,7 @@
 namespace Bomsiwor\Trustmark\Core;
 
 use Bomsiwor\Trustmark\Contracts\ClientContract;
+use Bomsiwor\Trustmark\Core\Clients\AntreanClient;
 use Bomsiwor\Trustmark\Core\Clients\VClaimClient;
 use Bomsiwor\Trustmark\Core\Decryptor\VClaimDecryptor;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
@@ -66,6 +67,9 @@ final class Factory
         // Add decryptor condition
         switch ($this->clientClass) {
             case VClaimClient::class:
+                $decryptor = new VClaimDecryptor($transporter->getConfig('consId'), $transporter->getConfig('secretKey'));
+                break;
+            case AntreanClient::class:
                 $decryptor = new VClaimDecryptor($transporter->getConfig('consId'), $transporter->getConfig('secretKey'));
                 break;
         }
