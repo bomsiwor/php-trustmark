@@ -2,5 +2,10 @@
 
 function insertLPK(string $noSep): array
 {
-  return baseVClaimResponse($noSep);
+    return baseVClaimResponse($noSep);
+}
+
+function deleteLPK(): array
+{
+    return baseVClaimResponse([]);
 }
