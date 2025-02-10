@@ -6,20 +6,15 @@ namespace Bomsiwor\Trustmark\Resources\VClaim;
 
 use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
+use Bomsiwor\Trustmark\Contracts\TransporterContract;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
-use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
 use Respect\Validation\Validator as v;
 
 final class Peserta extends BaseVClaim implements VClaimContract
 {
-    private DecryptorContract $decryptor;
-
-    public function __construct(private readonly HttpTransporter $transporter)
-    {
-        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
-    }
+    public function __construct(private readonly TransporterContract $transporter, private readonly DecryptorContract $decryptor) {}
 
     public function getServiceName(): string
     {

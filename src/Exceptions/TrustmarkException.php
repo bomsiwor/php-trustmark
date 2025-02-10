@@ -9,7 +9,7 @@ use Exception;
  * Scope error dapat berasal dari 'local' berarti error pada saat sebelum atau sesudah mengirim request ke BPJS.
  * Scope 'BPJS' berarti error pada saat request ke BPJS. Bisa jadi dikarenakan oleh API BPJS yang sedang down.
  */
-class VClaimException extends Exception
+class TrustmarkException extends Exception
 {
     public function __construct(
         string $message,

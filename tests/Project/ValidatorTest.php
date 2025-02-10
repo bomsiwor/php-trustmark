@@ -1,7 +1,7 @@
 <?php
 
 use Bomsiwor\Trustmark\Core\PackageValidator;
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Respect\Validation\Validator as v;
 
 it('can pass validate using vclaim validator', function () {
@@ -31,5 +31,5 @@ it('can throw exception using vclaim validator', function () {
         'tglKeluar' => v::date('Y-m-d')->lessThan('2024-12-31'),
     ];
 
-    expect(fn () => PackageValidator::validate($data, $rules))->toThrow(VClaimException::class);
+    expect(fn () => PackageValidator::validate($data, $rules))->toThrow(TrustmarkException::class);
 });

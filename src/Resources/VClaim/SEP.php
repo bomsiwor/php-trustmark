@@ -6,29 +6,16 @@ namespace Bomsiwor\Trustmark\Resources\VClaim;
 
 use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Contracts\Resources\VClaimContract;
-use Bomsiwor\Trustmark\Enums\VClaim\AssesmentPelayananEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\FlagProcedureEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\JenisFaskesEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\JenisKecelakaanBPJSEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\JenisPelayananBPJSEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\JenisPengajuanSEPApprovalEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\KodePenunjangSEPEnum;
-use Bomsiwor\Trustmark\Enums\VClaim\TujuanKunjunganEnum;
-use Bomsiwor\Trustmark\Exceptions\VClaimException;
+use Bomsiwor\Trustmark\Contracts\TransporterContract;
+use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
-use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
 use Respect\Validation\Validator as v;
 
 final class SEP extends BaseVClaim implements VClaimContract
 {
-    private DecryptorContract $decryptor;
-
-    public function __construct(private readonly HttpTransporter $transporter)
-    {
-        $this->decryptor = $this->createDecryptor($this->transporter->getConfig('consId'), $this->transporter->getConfig('secretKey'));
-    }
+    public function __construct(private readonly TransporterContract $transporter, private readonly DecryptorContract $decryptor) {}
 
     public function getServiceName(): string
     {
@@ -455,61 +442,24 @@ final class SEP extends BaseVClaim implements VClaimContract
      */
     public function getValidationRules(array $keys): array
     {
-        // SEP SHared Rules
-        $sharedRules = [
-            'noSep' => v::stringType()->length(19, 19, true),
-            'klsRawatHak' => v::intType()->between(1, 3),
-            'klsRawatNaik' => v::nullable(v::intType()->between(1, 8)),
-            'pembiayaan' => v::nullable(v::intType()->between(1, 3)),
-            'penanggungJawab' => v::nullable(v::stringType()),
-            'noMR' => v::stringType()->length(5, null),
-            'catatan' => v::nullable(v::stringType()),
-            'diagAwal' => v::stringType(),
-            'poliTujuan' => v::stringType(),
-            'poliEksekutif' => v::boolType(),
-            'cob' => v::boolType(),
-            'katarak' => v::boolType(),
-            'jaminanLakaLantas' => v::nullable(v::intType()->in(JenisKecelakaanBPJSEnum::values())),
-            'jaminanNoLP' => v::nullable(v::stringType()->length(0, null)),
-            'jaminanTglKejadian' => v::nullable(v::stringType()->date('Y-m-d')),
-            'jaminanKeterangan' => v::nullable(v::stringType()),
-            'jaminanSuplesi' => v::nullable(v::boolType()),
-            'jaminanNoSepSuplesi' => v::nullable(v::stringType()->length(10, null)),
-            'jaminanLakaProvinsi' => v::nullable(v::stringType()),
-            'jaminanLakaKabupaten' => v::nullable(v::stringType()),
-            'jaminanLakaKecamatan' => v::nullable(v::stringType()),
-            'dpjpLayan' => v::nullable(v::stringType()->length(3, null)),
-            'noTelp' => v::nullable(v::stringType()->length(8)),
-            'user' => v::stringType()->length(3, null),
-            'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
-            'tglSep' => v::date('Y-m-d'),
-            'jnsPelayanan' => v::intType()->in(JenisPelayananBPJSEnum::values()),
-            'jnsPengajuan' => v::intType()->in(JenisPengajuanSEPApprovalEnum::values()),
-        ];
+        $sharedRules = $this->getSharedRules();
 
         $rules = [
             ...$sharedRules,
-            'tglPelayanan' => v::date('Y-m-d')
-                ->oneOf(
-                    v::lessThan((new DateTime)->format('Y-m-d')),
-                    v::equals((new DateTime)->format('Y-m-d'))
-                ),
-            'bulan' => v::intVal()->between(1, 12),
-            'tahun' => v::intVal()->greaterThan(2000),
 
             // SEP insert Object
             'insertSEP' => v::key('noBpjs', $sharedRules['noBpjs'])
                 ->key('tglSep', v::date('Y-m-d'))
                 ->key('ppkPelayanan', v::stringType()->length(8, 10))
                 ->key('jnsPelayanan', $sharedRules['jnsPelayanan'])
-                ->key('asalRujukan', v::nullable(v::intType()->in(JenisFaskesEnum::values())))
+                ->key('asalRujukan', v::nullable($sharedRules['jenisFaskes']))
                 ->key('tglRujukan', v::nullable(v::date('Y-m-d')))
-                ->key('noRujukan', v::nullable(v::stringType()->length(8, null)))
+                ->key('noRujukan', v::nullable($sharedRules['noRujukan']))
                 ->key('ppkRujukan', v::nullable(v::stringType()))
-                ->key('tujuanKunj', v::nullable(v::intType()->in(TujuanKunjunganEnum::values())))
-                ->key('flagProcedure', v::nullable(v::intType()->in(FlagProcedureEnum::values())))
-                ->key('kdPenunjang', v::nullable(v::intType()->in(KodePenunjangSEPEnum::values())))
-                ->key('assesmentPel', v::nullable(v::intType()->in(AssesmentPelayananEnum::values())))
+                ->key('tujuanKunj', v::nullable($sharedRules['tujuanKunj']))
+                ->key('flagProcedure', v::nullable($sharedRules['flagProcedure']))
+                ->key('kdPenunjang', v::nullable($sharedRules['kdPenunjang']))
+                ->key('assesmentPel', v::nullable($sharedRules['assesmentPel']))
                 ->key('skdpNoSurat', v::nullable(v::stringType()->length(15, null)))
                 ->key('skdpKodeDPJP', v::nullable(v::stringType()->length(3, null)))
                 ->key('klsRawatHak', $sharedRules['klsRawatHak'])
@@ -579,7 +529,7 @@ final class SEP extends BaseVClaim implements VClaimContract
         return array_intersect_key($rules, array_flip($keys));
     }
 
-    private function createBody(string $key, mixed $raw): mixed
+    public function createBody(string $key, mixed $raw): mixed
     {
         $structures = [
             'insertSEP' => fn ($data) => [
@@ -738,7 +688,7 @@ final class SEP extends BaseVClaim implements VClaimContract
 
         // Throw error if key not exists
         if (! array_key_exists($key, $structures)) {
-            throw new VClaimException("Key {$key} not exists on structures", 'Validation');
+            throw new TrustmarkException("Key {$key} not exists on structures", 'Validation');
         }
 
         return $structures[$key]($raw);

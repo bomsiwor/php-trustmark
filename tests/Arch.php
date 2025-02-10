@@ -8,6 +8,10 @@ arch('Enums')
     ->expect('Bomsiwor\Trustmark\Enums')
     ->toBeEnums();
 
+arch('VClaim Enum')
+    ->expect('Bomsiwor\Trustmark\Enums\VClaim')
+    ->toUseTrait('Bomsiwor\Trustmark\Traits\EnumToArray');
+
 arch('Traits')
     ->expect('Bomsiwor\Trustmark\Traits')
     ->toBeTraits();

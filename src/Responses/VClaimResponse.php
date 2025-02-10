@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Responses;
 
-use Bomsiwor\Trustmark\Core\Decryptor\VClaimDecryptor;
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Exception;
 
 final class VClaimResponse
 {
-    public static function from(VClaimDecryptor $decryptor, mixed $result, string $timestamp, bool $obfuscated = true): mixed
+    public static function from(DecryptorContract $decryptor, mixed $result, string $timestamp, bool $obfuscated = true): mixed
     {
         // Decrypt data to get actual content
         if (! array_key_exists('response', $result ?? [])) {
@@ -17,7 +17,10 @@ final class VClaimResponse
         }
 
         // Generate response message
+        // Then unset the metadata
         $result['message'] = $result['metaData']['message'] ?? $result['metadata']['message'];
+        unset($result['metaData']);
+        unset($result['metadata']);
 
         // Generate response by unpack the result
         if (! $result['response']) {

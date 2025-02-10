@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Bomsiwor\Trustmark\Transporters;
 
+use Bomsiwor\Trustmark\Contracts\TransporterContract;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use Psr\Http\Client\ClientInterface;
 
-final class HttpTransporter
+final class HttpTransporter implements TransporterContract
 {
     public function __construct(
         private ?ClientInterface $client,
