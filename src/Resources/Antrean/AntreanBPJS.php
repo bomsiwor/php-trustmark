@@ -27,7 +27,7 @@ final class Peserta extends BaseWSAntrean implements AntreanContract
 
     public function poli()
     {
-        // Write Format URIs
+        // Write Format URI
         $formatUri = '%s/poli';
 
         // Create payload to generate request instance
