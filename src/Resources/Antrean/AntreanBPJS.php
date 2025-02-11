@@ -25,6 +25,11 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         };
     }
 
+    /**
+     * Mengambil data poli untuk antrean
+     *
+     * @return mixed Data poli untuk antrean
+     */
     public function poli()
     {
         // Write Format URI
@@ -39,6 +44,11 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mengambil data dokter yang terdaftar sesuai faskes.
+     *
+     * @return mixed Data dokter
+     */
     public function dokter()
     {
         // Write Format URI
@@ -53,8 +63,21 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan data jadwal dokter sesuai tanggal yang dipilih.
+     *
+     * @param  string  $kodePoli  Kode poli dari referensi poli antrean.
+     * @param  string  $tanggal  Tanggal yang dipilih (format: Y-m-d)
+     * @return mixed
+     */
     public function jadwalDokter(string $kodePoli, string $tanggal)
     {
+        // Validate payload
+        $data = compact('kodePoli', 'tanggal');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = 'jadwaldokter/kodepoli/%s/tanggal/%s';
 
@@ -67,6 +90,11 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan data poli yang valid untuk fingerprint
+     *
+     * @return mixed
+     */
     public function poliFingerprint()
     {
         // Write Format URI
@@ -81,9 +109,21 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
-    // TODO: add validation for args
+    /**
+     * Mendapatkan status fingerprint pasien.
+     *
+     * @param  string  $tipeIdentitas  Tipe identitas (noka | nik)
+     * @param  string  $noidentitas  Nomor identitas sesuai dengan tipe identitas yang dipilih
+     * @return mixed
+     */
     public function pasienFingerprint(string $tipeIdentitas, string $noIdentitas)
     {
+        // Validate payload
+        $data = compact('tipeIdentitas', 'noIdentitas');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = '%s/pasien/fp/identitas/%s/noidentitas/%s';
 
@@ -110,6 +150,12 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan semua task ID untuk kode booking.
+     * *
+     * @param  string  $kodeBooking  Kode Booking
+     * @return mixed
+     */
     public function taskIDList(string $kodeBooking)
     {
         // Write Format URI
@@ -126,8 +172,22 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Dasboard per tanggal
+     *
+     * @param  string  $tanggal  Tanggal (format : Y-m-d)
+     * @param  string  $waktu  Waktu
+     * @return mixed
+     */
     public function dashboardPerDate(string $tanggal, string $waktu)
     {
+
+        // Validate payload
+        $data = compact('tanggal');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = '%s/waktutunggu/tanggal/%s/waktu/%s';
 
@@ -142,8 +202,23 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp(), false);
     }
 
+    /**
+     * Dashboard per bulan
+     *
+     * @param  int  $bulan  Bulan (1-12)
+     * @param  int  $tahun  Tahun (min tahun 2000)
+     * @param  string  $waktu  Waktu
+     * @return mixed
+     */
     public function dashboardPerBulan(int $bulan, int $tahun, string $waktu)
     {
+
+        // Validate payload
+        $data = compact('bulan', 'tahun');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = '%s/waktutunggu/bulan/%s/tahun/%d/waktu/%s';
 
@@ -156,8 +231,23 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
-    public function perTanggal(string $tanggal)
+    /**
+     * Data task list per tanggal
+     *
+     * @param  string  $tanggal  Tanggal (format : Y-m-d). Default hari ini.
+     * @return mixed
+     */
+    public function perTanggal(?string $tanggal = null)
     {
+        // Default value
+        $tanggal ??= (new DateTime)->format('Y-m-d');
+
+        // Validate payload
+        $data = compact('tanggal');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = '%s/pendaftaran/tanggal/%s';
 
@@ -170,8 +260,20 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan data task list by kode booking
+     *
+     * @param  string  $kodeBooking  Kode Booking
+     * @return mixed
+     */
     public function perKodeBooking(string $kodeBooking)
     {
+        // Validate payload
+        $data = compact('kodeBooking');
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
         $formatUri = '%s/pendaftaran/kodebooking/%s';
 
@@ -184,6 +286,11 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Mendapatkan data antrean belum dilayani oleh BPJS.
+     *
+     * @return mixed
+     */
     public function belumDilayani()
     {
         // Write Format URI
@@ -198,10 +305,26 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
-    public function belumDilayaniPerPoli(string $kodePoli, string $kodeDokter, string $hari, string $jamPraktik)
+    /**
+     * Mendapatkan antrean belum dilayani oleh poli dan dokter, serta jam praktik.
+     *
+     * @param  string  $kodePoli  Kode Poli.
+     * @param  string  $kodeDokter  Kode dokter.
+     * @param  int  $hari  Hari (1-7)
+     * @param  string  $jamPraktik  Jam Praktik.
+     * @return mixed
+     */
+    public function belumDilayaniPerPoli(string $kodePoli, string $kodeDokter, int $hari, string $jamPraktik)
     {
+        // Validate payload
+        $data = compact('hari', 'kodePoli', 'kodeDokter');
+
+        $rules = $this->getValidationRules(array_keys($data));
+
+        $this->validate($data, $rules);
+
         // Write Format URI
-        $formatUri = '%s/pendaftaran/kodepoli/%s/kodedokter/%s/hari/%s/jampraktek/%s';
+        $formatUri = '%s/pendaftaran/kodepoli/%s/kodedokter/%s/hari/%d/jampraktek/%s';
 
         // Create payload to generate request instance
         $payload = Payload::get($formatUri, [$this->getServiceName(), $kodePoli, $kodeDokter, $hari, $jamPraktik]);
@@ -214,9 +337,10 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
 
     public function getValidationRules(array $keys): array
     {
+        $sharedRules = $this->getSharedRules();
+
         $rules = [
-            'nik' => v::stringType()->length(16, 16)->setName('NIK'),
-            'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
+            ...$sharedRules,
             'sepDate' => v::date('Y-m-d')
                 ->oneOf(
                     v::lessThan((new DateTime)->format('Y-m-d')),

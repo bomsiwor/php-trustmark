@@ -44,6 +44,7 @@ class BaseWSAntrean
     protected function getSharedRules(): array
     {
         return [
+            'kodePoli' => v::stringType(),
             'kodePPK' => v::stringType()->length(8, 10),
             'tanggal' => v::date('Y-m-d'),
             'tglPelayanan' => v::date('Y-m-d')
@@ -52,6 +53,15 @@ class BaseWSAntrean
                     v::equals((new DateTime)->format('Y-m-d'))
                 ),
             'noSep' => v::stringType()->length(19, 19, true),
+            'noIdentitas' => v::stringType()->length(11, 16),
+            'nik' => v::stringType()->length(16, 16)->setName('NIK'),
+            'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
+            'hari' => v::intVal()->between(1, 7),
+            'bulan' => v::intVal()->between(1, 12),
+            'tahun' => v::intVal()->greaterThan(2000),
+            'kodeBooking' => v::stringType()->length(6, null),
+            'kodeDokter' => v::nullable(v::stringType()->length(3, null)),
+
             'klsRawatHak' => v::intType()->between(1, 3),
             'klsRawatNaik' => v::nullable(v::intType()->between(1, 8)),
             'pembiayaan' => v::nullable(v::intType()->between(1, 3)),
@@ -59,7 +69,6 @@ class BaseWSAntrean
             'noMR' => v::stringType()->length(5, null),
             'catatan' => v::nullable(v::stringType()),
             'diagAwal' => v::stringType(),
-            'poliTujuan' => v::stringType(),
             'poliEksekutif' => v::boolType(),
             'cob' => v::boolType(),
             'katarak' => v::boolType(),
@@ -72,15 +81,12 @@ class BaseWSAntrean
             'jaminanLakaProvinsi' => v::nullable(v::stringType()),
             'jaminanLakaKabupaten' => v::nullable(v::stringType()),
             'jaminanLakaKecamatan' => v::nullable(v::stringType()),
-            'dpjpLayan' => v::nullable(v::stringType()->length(3, null)),
             'noTelp' => v::nullable(v::stringType()->length(8)),
             'user' => v::stringType()->length(3, null),
             'noBpjs' => v::stringType()->length(13, 15)->setName('Nomor BPJS'),
             'tglSep' => v::date('Y-m-d'),
             'jnsPelayanan' => v::intType()->in(JenisPelayananBPJSEnum::values()),
             'jnsPengajuan' => v::intType()->in(JenisPengajuanSEPApprovalEnum::values()),
-            'bulan' => v::intVal()->between(1, 12),
-            'tahun' => v::intVal()->greaterThan(2000),
             'noRujukan' => v::stringType()->length(8, null),
             'tujuanKunj' => v::intType()->in(TujuanKunjunganEnum::values()),
             'flagProcedure' => v::intType()->in(FlagProcedureEnum::values()),
