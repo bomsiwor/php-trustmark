@@ -45,6 +45,7 @@ class BaseWSAntrean
     {
         return [
             'kodePoli' => v::stringType(),
+            'kodeSubspesialis' => v::stringType(),
             'kodePPK' => v::stringType()->length(8, 10),
             'tanggal' => v::date('Y-m-d'),
             'tglPelayanan' => v::date('Y-m-d')
@@ -61,6 +62,7 @@ class BaseWSAntrean
             'tahun' => v::intVal()->greaterThan(2000),
             'kodeBooking' => v::stringType()->length(6, null),
             'kodeDokter' => v::nullable(v::stringType()->length(3, null)),
+            'keterangan' => v::nullable(v::stringType()),
 
             'klsRawatHak' => v::intType()->between(1, 3),
             'klsRawatNaik' => v::nullable(v::intType()->between(1, 8)),

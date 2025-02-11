@@ -10,6 +10,7 @@ use Bomsiwor\Trustmark\Contracts\TransporterContract;
 use Bomsiwor\Trustmark\Responses\VClaimResponse;
 use Bomsiwor\Trustmark\ValueObjects\Transporter\Payload;
 use DateTime;
+use InvalidArgumentException;
 use Respect\Validation\Validator as v;
 
 final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
@@ -136,13 +137,102 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
     }
 
+    /**
+     * Update jadwal dokter pada aplikasi HFIS
+     *
+     * @param  array  $data  Data request
+     * @return mixed
+     */
     public function updateJadwalDokter(array $data)
     {
+        $key = 'updateJadwalDokter';
+
+        // Validate
+        $rules = $this->getValidationRules([$key]);
+        $this->validate([$key => $data], $rules);
+
+        // Create body
+        $body = $this->createBody($key, $data);
+
         // Write Format URI
         $formatUri = 'jadwaldokter/updatejadwaldokter';
 
         // Create payload to generate request instance
-        $payload = Payload::get($formatUri, [$this->getServiceName('ref')]);
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], $body);
+
+        // Send request using transporter
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    public function tambah(array $data)
+    {
+        // Write Format URI
+        $formatUri = '%s/add';
+
+        // Create body
+        $body = [];
+
+        // Create payload to generate request instance
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], $body);
+
+        // Send request using transporter
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    public function updateWaktu(array $data)
+    {
+        // Write Format URI
+        $formatUri = '%s/updatewaktu';
+
+        // Create body
+        $body = [];
+
+        // Create payload to generate request instance
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], $body);
+
+        // Send request using transporter
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    public function tambahAntreanFarmasi(array $data)
+    {
+        // Write Format URI
+        $formatUri = '%s/farmasi/add';
+
+        // Create body
+        $body = [];
+
+        // Create payload to generate request instance
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], $body);
+
+        // Send request using transporter
+        $result = $this->transporter->sendRequest($payload);
+
+        return VClaimResponse::from($this->decryptor, $result, $this->transporter->getTimestamp());
+    }
+
+    public function batalAntrean(array $data)
+    {
+        $key = 'batalAntrean';
+
+        // Write Format URI
+        $formatUri = '%s/batal';
+
+        // Validate
+        $rules = $this->getValidationRules([$key]);
+        $this->validate([$key => $data], $rules);
+
+        // Create body
+        $body = $this->createBody($key, $data);
+
+        // Create payload to generate request instance
+        $payload = Payload::insert($formatUri, [$this->getServiceName()], $body);
 
         // Send request using transporter
         $result = $this->transporter->sendRequest($payload);
@@ -341,6 +431,23 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
 
         $rules = [
             ...$sharedRules,
+            'batalAntrean' => v::key('kodeBooking', $sharedRules['kodeBooking'])
+                ->key('keterangan', $sharedRules['keterangan']),
+
+            'updateJadwalDokter' => v::key('kodePoli', $sharedRules['kodePoli'])
+                ->key('kodeSubspesialis', $sharedRules['kodeSubspesialis'])
+                ->key('kodeDokter', $sharedRules['kodeDokter'])
+                ->key('jadwal', v::arrayType()->when(
+                    v::arrayType()->length(1, null),
+                    v::each(
+                        v::arrayType()->keySet(
+                            v::key('hari', v::intVal()->between(1, 8)),
+                            v::key('buka', v::dateTime('H:i')),
+                            v::key('tutup', v::dateTime('H:i')),
+                        )
+                    )
+                )),
+
             'sepDate' => v::date('Y-m-d')
                 ->oneOf(
                     v::lessThan((new DateTime)->format('Y-m-d')),
@@ -349,5 +456,24 @@ final class AntreanBPJS extends BaseWSAntrean implements AntreanContract
         ];
 
         return array_intersect_key($rules, array_flip($keys));
+    }
+
+    public function createBody(string $key, mixed $data): mixed
+    {
+        $builder = [
+            'batalAntrean' => fn ($raw) => [
+                'kodebooking' => $raw['kodeBooking'],
+                'keterangan' => $raw['keterangan'] ?? '',
+            ],
+
+            'updateJadwalDokter' => fn ($raw) => [
+                'kodepoli' => $raw['kodePoli'],
+                'kodesubspesialis' => $raw['kodeSubspesialis'],
+                'kodedokter' => $raw['kodeDokter'],
+                'jadwal' => $raw['jadwal'],
+            ],
+        ];
+
+        return $builder[$key]($data) ?? throw new InvalidArgumentException('Builder key invalid');
     }
 }
