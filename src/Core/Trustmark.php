@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bomsiwor\Trustmark\Core;
 
 use Bomsiwor\Trustmark\Contracts\ClientContract;
-use Bomsiwor\Trustmark\Core\Clients\AntreanClient;
-use Bomsiwor\Trustmark\Core\Clients\VClaimClient;
-use Bomsiwor\Trustmark\Core\Signature\VClaimSignature;
-use Respect\Validation\Validator as v;
+use Bomsiwor\Trustmark\Contracts\Resources\ClientFactoryInterface;
+use Bomsiwor\Trustmark\Core\Factories\AntreanClientFactory;
+use Bomsiwor\Trustmark\Core\Factories\VClaimClientFactory;
+use InvalidArgumentException;
 
 final class Trustmark
 {
@@ -17,78 +17,19 @@ final class Trustmark
      *
      * @return mixed
      */
-    public static function client(string $consId, string $secretKey, string $userKey, string $service, string $env = 'production'): ClientContract
+    public static function client(string $service, array $config): ClientContract
     {
-        // Validate config
-        $config = compact('consId', 'secretKey', 'userKey', 'env');
+        $factory = self::getFactory($service);
 
-        self::validateConfig($config);
-
-        // Generate signature untuk VClaim
-        $signatureGenerator = VClaimSignature::generateSignature($consId, $secretKey);
-
-        // Generate client class
-        $clientClass = self::getClientClass($service);
-
-        return self::factory($clientClass)
-            ->withTimestamp($signatureGenerator->getTimestamp())
-            ->withBaseUrl(self::getBaseUrl($env).'/'.self::getServiceUri($service, $env))
-            ->withConfig($config)
-            ->withHttpHeader('X-signature', $signatureGenerator->getSignature())
-            ->withHttpHeader('X-cons-id', $consId)
-            ->withHttpHeader('X-timestamp', $signatureGenerator->getTimestamp())
-            ->withHttpHeader('user_key', $userKey)
-            ->withHttpHeader('Accept', 'application/json')
-            ->make();
+        return $factory->createClient($config);
     }
 
-    public static function factory(string $clientClass): Factory
+    private static function getFactory(string $service): ClientFactoryInterface
     {
-        return new Factory($clientClass);
-    }
-
-    private static function validateConfig(array $options): void
-    {
-        $validator = [
-            'env' => v::in(['production', 'development']),
-            'consId' => v::stringType(),
-            'secretKey' => v::stringType(),
-            'userKey' => v::stringType(),
-        ];
-
-        PackageValidator::validate($options, $validator);
-    }
-
-    private static function getServiceUri(string $service, string $env)
-    {
-        return match ($service.'.'.$env) {
-            'vclaim.production' => 'vclaim-rest',
-            'vclaim.development' => 'vclaim-rest-dev',
-            'antrean.production' => 'antreanrs',
-            'antrean.development' => 'antreanrs_dev',
-        };
-    }
-
-    private static function getBaseUrl(string $env)
-    {
-        return match ($env) {
-            'production' => 'https://apijkn.bpjs-kesehatan.go.id',
-            'development' => 'https://apijkn-dev.bpjs-kesehatan.go.id',
-        };
-    }
-
-    public static function getClientClass(string $service): ?string
-    {
-        $validator = [
-            'service' => v::in(['vclaim', 'antrean']),
-        ];
-
-        PackageValidator::validate(['service' => $service], $validator);
-
         return match ($service) {
-            'vclaim' => VClaimClient::class,
-            'antrean' => AntreanClient::class,
-            default => null,
+            'vclaim' => new VClaimClientFactory,
+            'antrean' => new AntreanClientFactory,
+            default => throw new InvalidArgumentException('Service not supported')
         };
     }
 }

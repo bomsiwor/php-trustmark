@@ -1,43 +1,49 @@
 <?php
 
-use Bomsiwor\Trustmark\Contracts\ClientContract;
+use Bomsiwor\Trustmark\Core\Clients\AntreanClient;
 use Bomsiwor\Trustmark\Core\Clients\VClaimClient;
 use Bomsiwor\Trustmark\Core\Trustmark;
 use Bomsiwor\Trustmark\Exceptions\TrustmarkException;
+
+pest()->group('client-factory');
 
 // Scoped variable on this test
 $consId = '123abc';
 $secretKey = 'secretAlways';
 $userKey = 'userkey';
 
-it('create a client based on service id', function (string $serviceId, string $serviceClass) use ($consId, $userKey, $secretKey) {
+it('throw exception on invalid service', function () {
+    $client = Trustmark::client('random', []);
+})->throws(InvalidArgumentException::class, 'Service not supported');
 
-    $trustmarkClient = Trustmark::client($consId, $secretKey, $userKey, $serviceId, 'production');
+// ===============
+// VCLAIM BLOCK
+// ===============
 
-    expect($trustmarkClient)->toBeInstanceOf(ClientContract::class)->toBeInstanceOf($serviceClass);
-})
-    ->with([
-        ['vclaim', VClaimClient::class],
+it('on vclaim - create client', function () use ($consId, $secretKey, $userKey) {
+    $client = Trustmark::client('vclaim', [
+        'consId' => $consId,
+        'secretKey' => $secretKey,
+        'userKey' => $userKey,
     ]);
 
-it('throw error on invalid service id', function () use ($consId, $userKey, $secretKey) {
-    Trustmark::client($consId, $secretKey, $userKey, 'random', 'production');
+    expect($client)->toBeInstanceOf(VClaimClient::class);
+});
+
+it('on vclaim - throw validation error on invalid config', function () {
+    $client = Trustmark::client('vclaim', ['conf' => 'random']);
 })->throws(TrustmarkException::class);
 
-it('throw error on trustmark client without config', function () {
-    Trustmark::factory(VClaimClient::class)
-        ->withBaseUrl('http://trustmark.test')
-        ->withTimestamp(time())
-        ->make();
+// ===============
+// VCLAIM BLOCK
+// ===============
 
-})->throws(TypeError::class);
+it('on antrean - create client', function () use ($consId, $secretKey, $userKey) {
+    $client = Trustmark::client('antrean', [
+        'consId' => $consId,
+        'secretKey' => $secretKey,
+        'userKey' => $userKey,
+    ]);
 
-it('create a trustmark client via factory', function () {
-    $trustmarkClient = Trustmark::factory(VClaimClient::class)
-        ->withBaseUrl('http://trustmark.test')
-        ->withTimestamp(time())
-        ->withConfig(['consId' => 123, 'secretKey' => 123])
-        ->make();
-
-    expect($trustmarkClient)->toBeInstanceOf(ClientContract::class)->toBeInstanceOf(VClaimClient::class);
+    expect($client)->toBeInstanceOf(AntreanClient::class);
 });

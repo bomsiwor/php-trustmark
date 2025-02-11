@@ -3,9 +3,7 @@
 namespace Bomsiwor\Trustmark\Core;
 
 use Bomsiwor\Trustmark\Contracts\ClientContract;
-use Bomsiwor\Trustmark\Core\Clients\AntreanClient;
-use Bomsiwor\Trustmark\Core\Clients\VClaimClient;
-use Bomsiwor\Trustmark\Core\Decryptor\VClaimDecryptor;
+use Bomsiwor\Trustmark\Contracts\DecryptorContract;
 use Bomsiwor\Trustmark\Transporters\HttpTransporter;
 use Http\Discovery\Psr18ClientDiscovery;
 
@@ -21,6 +19,8 @@ final class Factory
     private ?string $baseUrl = null;
 
     private array $headers = [];
+
+    private ?DecryptorContract $decryptor = null;
 
     public function __construct(private string $clientClass) {}
 
@@ -55,6 +55,13 @@ final class Factory
         return $this;
     }
 
+    public function withDecryptor(DecryptorContract $decryptor): self
+    {
+        $this->decryptor = $decryptor;
+
+        return $this;
+    }
+
     public function make(): ClientContract
     {
         // Create client using PSR18
@@ -64,17 +71,7 @@ final class Factory
         // Pass client to transporter
         $transporter = new HttpTransporter($client, $this->baseUrl, $this->headers, $this->timestamp, $this->config);
 
-        // Add decryptor condition
-        switch ($this->clientClass) {
-            case VClaimClient::class:
-                $decryptor = new VClaimDecryptor($transporter->getConfig('consId'), $transporter->getConfig('secretKey'));
-                break;
-            case AntreanClient::class:
-                $decryptor = new VClaimDecryptor($transporter->getConfig('consId'), $transporter->getConfig('secretKey'));
-                break;
-        }
-
         // COnstruct client
-        return new $this->clientClass($transporter, $decryptor);
+        return new $this->clientClass($transporter, $this->decryptor);
     }
 }
